@@ -968,6 +968,12 @@ local tbl18 = {
   ["Auto Replay on Match End"] = "เล่นซ้ำเมื่อจบเกมอัตโนมัติ",
   ["Restart Delay"] = "หน่วงเวลาเริ่มใหม่ (วินาที)",
   ["Stop Dungeon at Last Life (1 Star)"] = "หยุดดันเจี้ยนเมื่อเหลือ 1 ชีวิต (1 ดาว)",
+  ["One-Click: Dungeon Run"] = "วันคลิก: Dungeon Run",
+  ["1-Click: Dungeon Run"] = "วันคลิก: Dungeon Run",
+  ["⚡ One-Click: Dungeon Run (เริ่มทันที)"] = "⚡ One-Click: Dungeon Run (เริ่มทันที)",
+  ["⚡ เริ่มฟาร์ม Dungeon ทันที (One Click)"] = "⚡ เริ่มฟาร์ม Dungeon ทันที (One Click)",
+  ["ตั้งค่าพรีเซ็ตดันเจี้ยน: โชค + กล่องทอง + AI (ไม่เริ่ม)"] = "ตั้งค่าพรีเซ็ตดันเจี้ยน: โชค + กล่องทอง + AI (ไม่เริ่ม)",
+  ["พรีเซ็ต #5 · Dungeon Run"] = "พรีเซ็ต #5 · Dungeon Run",
   ["Max Losses Before Switch (0=Off)"] = "แพ้ติดกันเกินกำหนดแล้วสลับโหมด (0=ปิด)",
   ["Wave Limits & Farm Sell"] = "ลิมิตเวฟ & ขายตัวฟาร์ม",
   ["Auto Sell Farms"] = "เปิดขายตัวฟาร์มอัตโนมัติ",
@@ -14159,14 +14165,14 @@ end do
         local n2 = tonumber(tbl2.ActiveProfile) or 0
         return n2 > 0 and ("slot_" .. tostring(n2)) or "custom_default"
       end
-      local tbl44 = {custom_default = "ค่าเริ่มต้น (Story / Custom)", slot_1 = "พรีเซ็ต #1 · Summer Event", slot_2 = "พรีเซ็ต #2 · Farm Gems (W6)", slot_3 = "พรีเซ็ต #3 · Challenge", slot_4 = "พรีเซ็ต #4 · Story / XP" }
+      local tbl44 = {custom_default = "ค่าเริ่มต้น (Story / Custom)", slot_1 = "พรีเซ็ต #1 · Summer Event", slot_2 = "พรีเซ็ต #2 · Farm Gems (W6)", slot_3 = "พรีเซ็ต #3 · Challenge", slot_4 = "พรีเซ็ต #4 · Story / XP", slot_5 = "พรีเซ็ต #5 · Dungeon Run" }
       local function fn56(arg)
         return tbl44[arg] or tostring(arg)
       end
       local TextButton11 = fn12("TextButton", {Size = UDim2.new(0.56, - 4, 1, 0), BackgroundTransparency = 1, Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = tbl.AccentBright, Text = fn56(fn54()) .. "  [จัดการ]", TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, AutoButtonColor = false }, Frame16)
       local function fn57()
         local v20 = fn54()
-        local flag = (tbl2.IsCustomConfig == true) and (v20:match("^slot_[1-4]$") ~= nil)
+        local flag = (tbl2.IsCustomConfig == true) and (v20:match("^slot_[1-5]$") ~= nil)
         if flag then
           TextButton11.Text = "Custom \194\183 " .. fn56(v20) .. "  >" TextButton11.TextColor3 = tbl.Amber
         else
@@ -14175,7 +14181,7 @@ end do
       end fn57() table.insert(tbl20, fn57)
       local TextButton12 = fn12("TextButton", {Position = UDim2.new(0.56, 4, 0.5, - 13), Size = UDim2.new(0.22, - 4, 0, 26), BackgroundColor3 = tbl.CardHeader, Font = Enum.Font.GothamBold, TextSize = 11, TextColor3 = tbl.Emerald, Text = fn25("Save"), AutoButtonColor = false }, Frame16) fn26(TextButton12, "Save") fn13(TextButton12, 6) fn14(TextButton12, tbl.Border, 0.45, 1) fn18(TextButton12, tbl.CardHeader, tbl.ControlHover)
       local TextButton13 = fn12("TextButton", {Position = UDim2.new(0.78, 4, 0.5, - 13), Size = UDim2.new(0.22, - 4, 0, 26), BackgroundColor3 = tbl.CardHeader, Font = Enum.Font.GothamBold, TextSize = 11, TextColor3 = tbl.Danger, Text = fn25("Reset"), AutoButtonColor = false }, Frame16) fn26(TextButton13, "Reset") fn13(TextButton13, 6) fn14(TextButton13, tbl.Border, 0.45, 1) fn18(TextButton13, tbl.CardHeader, tbl.ControlHover)
-      local Frame17 = fn12("Frame", {Size = UDim2.new(1, 0, 0, 136), BackgroundTransparency = 1, LayoutOrder = quickProfiles[2]() }, quickProfiles[1]) fn16(Frame17, 4)
+      local Frame17 = fn12("Frame", {Size = UDim2.new(1, 0, 0, 172), BackgroundTransparency = 1, LayoutOrder = quickProfiles[2]() }, quickProfiles[1]) fn16(Frame17, 4)
       local tbl45 = {} fn55 = function ()
         local v20 = fn54()
         for k, v21 in pairs(tbl45) do
@@ -14230,7 +14236,7 @@ end do
             end
           end
           local tbl46 = {}
-          for i = 1, 4 do
+          for i = 1, 5 do
             tbl46["slot_" .. i] = true
           end
           for k, v20 in pairs(tbl12) do
@@ -14243,7 +14249,7 @@ end do
           local v20 = fn54()
           for i, v21 in ipairs(tbl47) do
             local flag = (v21 == v20)
-            local flag2 = (v21:match("^slot_[1-4]$") ~= nil)
+            local flag2 = (v21:match("^slot_[1-5]$") ~= nil)
             local Frame20 = fn12("Frame", {Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = flag and tbl.ControlActive or tbl.Control, LayoutOrder = i, ZIndex = 34 }, Frame19) fn13(Frame20, 7) fn14(Frame20, flag and tbl.AccentBright or tbl.Border, flag and 0.25 or 0.65, 1) fn15(Frame20, 10, 0, 8, 0) fn12("TextLabel", {Size = UDim2.new(1, - 168, 1, 0), BackgroundTransparency = 1, Font = Enum.Font.GothamBold, TextSize = 11.5, TextColor3 = flag and tbl.AccentBright or tbl.Text, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Text = (flag and ("\226\152\133 " .. fn56(v21)) or fn56(v21)), ZIndex = 35 }, Frame20)
             local TextButton16 = fn12("TextButton", {Position = UDim2.new(1, flag2 and - 106 or - 160, 0.5, - 12), Size = UDim2.fromOffset(50, 24), BackgroundColor3 = flag and tbl.Emerald or tbl.Accent, Font = Enum.Font.GothamBold, TextSize = 11, TextColor3 = Color3.fromRGB(10, 14, 22), Text = flag and fn25("Active") or fn25("Load"), AutoButtonColor = false, ZIndex = 35 }, Frame20) fn13(TextButton16, 5) TextButton16.MouseButton1Click:Connect(function ()
               fn58(v21) parent.Visible = false
@@ -14273,7 +14279,7 @@ end do
             return
           end
           local v20 = fn54()
-          if not v20:match("^slot_[1-4]$") then
+          if not v20:match("^slot_[1-5]$") then
             tbl12[v20] = nil
           end tbl2.ActiveProfile = activeProfile fn9() refreshAllControls() fn55() TextBox2.Text = "" fn59() fn21("เปลี่ยนชื่อโปรไฟล์สำเร็จ", v20 .. " -> " .. activeProfile, tbl.AccentBright)
         end) TextButton11.MouseButton1Click:Connect(function ()
@@ -14310,6 +14316,49 @@ end do
             local tbl46 = {enemy_hp = 1, range = 2, enemy_regen = 3, attack = 4, cooldown = 5, enemy_spd = 6, enemy_shd = 7, plated = 8, spellproof = 9, resistant = 10 }
             for k, v20 in pairs(tbl4) do
               v20.Priority = tbl46[k] or 0 v20.Never = (k == "inferno" or k == "dodge")
+            end
+          elseif arg2 == "dungeon" then
+            local Dungeon = fn("Dungeon")
+            if Dungeon then
+              Dungeon.Difficulty = "Normal"
+              Dungeon.PartySize = "Solo"
+              Dungeon.RoomPriority = "Gold Chest > Chest > Shop > Money"
+              Dungeon.OpenAtDepth = "20 (last room)"
+              Dungeon.GoldChests = true
+              Dungeon.AcceptShrines = false
+              Dungeon.AcceptedShrineCurses = {}
+              local tbl57 = {"genie lamp", "golden fishhook", "fishhook", "philosopher's stone", "shimmering moon fragment", "treasure chest" }
+              local buyItems = {}
+              for i, v29 in ipairs(tbl51 or {}) do
+                local str4 = v29:lower()
+                for i2, v30 in ipairs(tbl57) do
+                  if str4:find(v30, 1, true) then
+                    buyItems[v29] = true
+                    break
+                  end
+                end
+              end
+              for i, v29 in ipairs(tbl57) do
+                buyItems[v29] = true
+              end
+              Dungeon.BuyItems = buyItems
+              local avoidCurses = {}
+              for i, v29 in ipairs(tbl49 or {}) do
+                avoidCurses[v29] = true
+              end
+              Dungeon.AvoidCurses = avoidCurses
+              Dungeon.DungeonDefeatMode = "AI Adaptive Retry"
+              Dungeon.RetryLostRoom = true
+              Dungeon.AdaptiveRetry = true
+              Dungeon.DungeonAdaptLossThreshold = 2
+              Dungeon.DungeonAdaptActions = {["Turn Off AutoSkip"] = true, ["Combat First (FocusFarm Off)"] = true, ["Adjust Path % / Zone"] = true, ["Damage Priority & Spend All"] = true, ["Leave to Lobby for Team Counter"] = true }
+              Dungeon.DungeonTeamCounterMode = "Match Game Loadout (Loadouts 1-6)"
+              Dungeon.DungeonTeamCounterWhen = "Before Room & On Defeat"
+              Dungeon.DungeonSwapMinLevel = 60
+            end
+            tbl2.StopDungeonLastLife = true
+            if tonumber(tbl2.DungeonMinKeys) == nil or tbl2.DungeonMinKeys == 0 then
+              tbl2.DungeonMinKeys = 1
             end
           else
             local tbl46 = {range = 1, attack = 2, cooldown = 3, double_atk = 4, boss_dmg = 5, yen = 6, enemy_hp = 7, enemy_regen = 8 }
@@ -14380,7 +14429,121 @@ end do
             return
           end fn58(arg, arg2, arg5, arg6, arg7, arg8, arg9, arg10)
         end)
-      end fn59(1, "Summer Event", "ฟาร์ม Pearls + สุ่มเลือกการ์ดอีเวนต์ Summer", tbl.AccentBright, "Summer Event", "Normal", 0, "Smart 25% Prio", "pearls") fn59(2, "Farm Gems (W6)", "ฟาร์มเพชร Infinite · Namek (Hard) ยอดนิยม", tbl.Emerald, "Infinite", "Hard", 6, "Smart 25% Prio", "safe", "namek_infinite") fn59(3, "Challenge", "ฟาร์มผลไม้ / ตั๋ว Challenge อัตโนมัติ", tbl.Amber, "Normal Challenge", "Normal", 0, "Spend All", "safe") fn59(4, "Story / XP", "เคลียร์ด่านเนื้อเรื่องและดันเจี้ยนเร่งด่วน", tbl.Frost, "Story", "Normal", 0, "Spend All", "safe") fn55() tbl25.bind(quickProfiles, tbl2, {{"stepper", "Gem Goal Stop (0=Off)", "GemGoal", 0, 50000, 1000, "", default = 0 } })
+      end fn59(1, "Summer Event", "ฟาร์ม Pearls + สุ่มเลือกการ์ดอีเวนต์ Summer", tbl.AccentBright, "Summer Event", "Normal", 0, "Smart 25% Prio", "pearls") fn59(2, "Farm Gems (W6)", "ฟาร์มเพชร Infinite · Namek (Hard) ยอดนิยม", tbl.Emerald, "Infinite", "Hard", 6, "Smart 25% Prio", "safe", "namek_infinite") fn59(3, "Challenge", "ฟาร์มผลไม้ / ตั๋ว Challenge อัตโนมัติ", tbl.Amber, "Normal Challenge", "Normal", 0, "Spend All", "safe") fn59(4, "Story / XP", "เคลียร์ด่านเนื้อเรื่องและดันเจี้ยนเร่งด่วน", tbl.Frost, "Story", "Normal", 0, "Spend All", "safe") fn59(5, "Dungeon Run", "ฟาร์มดันเจี้ยนไต่ชั้น · กล่องทอง + AI ปรับแผนสู้", tbl.Aurora, "Dungeon", "Normal", 0, "Spend All", "dungeon") fn55() tbl25.bind(quickProfiles, tbl2, {{"stepper", "Gem Goal Stop (0=Off)", "GemGoal", 0, 50000, 1000, "", default = 0 } })
+      do
+        local v20 = fn36(v17, "One-Click: Dungeon Run", 1, tbl.Aurora)
+        fn43(v20, "⚡ เริ่มฟาร์ม Dungeon ทันที (One Click)", true, function ()
+          fn58(5, "Dungeon Run", "Dungeon", "Normal", 0, "Spend All", "dungeon")
+          pcall(fn21, tbl2.Language == "TH" and "⚡ One Click: Dungeon Run" or "⚡ One Click: Dungeon Run", tbl2.Language == "TH" and "เปิดฟาร์มดันเจี้ยนทันที + AI ปรับแผนสู้อัตโนมัติ" or "Dungeon Auto Farm started with Optimal Preset & AI!", tbl.Emerald)
+        end)
+        fn43(v20, "ตั้งค่าพรีเซ็ตดันเจี้ยน: โชค + กล่องทอง + AI (ไม่เริ่ม)", false, function ()
+          local Dungeon = fn("Dungeon")
+          if Dungeon then
+            Dungeon.Difficulty = "Normal"
+            Dungeon.PartySize = "Solo"
+            Dungeon.RoomPriority = "Gold Chest > Chest > Shop > Money"
+            Dungeon.OpenAtDepth = "20 (last room)"
+            Dungeon.GoldChests = true
+            Dungeon.AcceptShrines = false
+            Dungeon.AcceptedShrineCurses = {}
+            local tbl57 = {"genie lamp", "golden fishhook", "fishhook", "philosopher's stone", "shimmering moon fragment", "treasure chest" }
+            local buyItems = {}
+            for i, v29 in ipairs(tbl51 or {}) do
+              local str4 = v29:lower()
+              for i2, v30 in ipairs(tbl57) do
+                if str4:find(v30, 1, true) then
+                  buyItems[v29] = true
+                  break
+                end
+              end
+            end
+            for i, v29 in ipairs(tbl57) do
+              buyItems[v29] = true
+            end
+            Dungeon.BuyItems = buyItems
+            local avoidCurses = {}
+            for i, v29 in ipairs(tbl49 or {}) do
+              avoidCurses[v29] = true
+            end
+            Dungeon.AvoidCurses = avoidCurses
+            Dungeon.DungeonDefeatMode = "AI Adaptive Retry"
+            Dungeon.RetryLostRoom = true
+            Dungeon.AdaptiveRetry = true
+            Dungeon.DungeonAdaptLossThreshold = 2
+            Dungeon.DungeonAdaptActions = {["Turn Off AutoSkip"] = true, ["Combat First (FocusFarm Off)"] = true, ["Adjust Path % / Zone"] = true, ["Damage Priority & Spend All"] = true, ["Leave to Lobby for Team Counter"] = true }
+            Dungeon.DungeonTeamCounterMode = "Match Game Loadout (Loadouts 1-6)"
+            Dungeon.DungeonTeamCounterWhen = "Before Room & On Defeat"
+            Dungeon.DungeonSwapMinLevel = 60
+          end
+          tbl2.TargetMode = "Dungeon"
+          tbl2.Difficulty = "Normal"
+          tbl2.PlayPartyMode = "Solo"
+          tbl2.UpgradeMode = "Spend All"
+          tbl2.FocusFarm = true
+          tbl2.AutoVoteStart = true
+          tbl2.AutoSkipWave = true
+          tbl2.AutoReplay = true
+          tbl2.AutoPlace = true
+          tbl2.AutoUpgrade = true
+          tbl2.UsePathPercent = true
+          tbl2.PathPercent = 50
+          tbl2.StopDungeonLastLife = true
+          if tonumber(tbl2.DungeonMinKeys) == nil or tbl2.DungeonMinKeys == 0 then
+            tbl2.DungeonMinKeys = 1
+          end
+          if tbl2.SeparateModeUnitSets then
+            tbl2.ActiveSetMode = "Dungeon"
+            if _G.__SH_RT and _G.__SH_RT.setUnitScopeMode then
+              _G.__SH_RT.setUnitScopeMode("Dungeon")
+            end
+          end
+          fn9() fn53() refreshAllControls()
+          for i = 1, 6 do
+            fn46(i)
+          end
+          pcall(fn21, tbl2.Language == "TH" and "ตั้งค่าพรีเซ็ตดันเจี้ยนสำเร็จ" or "Dungeon Preset Applied", tbl2.Language == "TH" and "เน้นโชค + กล่องทอง + AI ปรับแผนสู้อัตโนมัติ" or "Applied Luck + Gold Chest + AI Retry preset", tbl.AccentBright)
+        end)
+        tbl25.bind(v20, function ()
+          return fn("Dungeon")
+        end, {
+          {"stepper", "ขั้นต่ำกุญแจก่อนลงดันเจี้ยน (0 = ปิด)", "DungeonMinKeys", 0, 10, 1, " Keys", after = function (arg)
+            tbl2.DungeonMinKeys = math.clamp(math.floor(tonumber(arg) or 0), 0, 10)
+          end },
+          {"toggle", "รออีเวนต์ x2 กล่องดันเจี้ยนเท่านั้น", "DungeonWaitX2Event", after = function (arg)
+            tbl2.DungeonWaitX2Event = (arg == true)
+          end },
+          {"toggle", "หยุดเมื่อเหลือ 1 ชีวิต (1 ดาว)", "StopDungeonLastLife", after = function (arg)
+            tbl2.StopDungeonLastLife = (arg == true)
+          end },
+          {"dropdown", "Dungeon: On Room Defeat", "DungeonDefeatMode", {"Off (No Retry)", "Retry (Same Plan)", "AI Adaptive Retry" }, default = "AI Adaptive Retry", after = function (dungeonDefeatMode)
+            local Dungeon = fn("Dungeon") Dungeon.DungeonDefeatMode = dungeonDefeatMode Dungeon.RetryLostRoom = (dungeonDefeatMode ~= "Off (No Retry)") Dungeon.AdaptiveRetry = (dungeonDefeatMode == "AI Adaptive Retry")
+          end },
+          {"dropdown", "Team Counter Mode", "DungeonTeamCounterMode", {"Off (Use Current Team)", "Match Game Loadout (Loadouts 1-6)", "Smart Swap DPS (Owned Units)" }, default = "Match Game Loadout (Loadouts 1-6)" }
+        }, refreshAllControls)
+        local dungeonStatusLabel = fn12("TextLabel", {Size = UDim2.new(1, 0, 0, 26), BackgroundColor3 = tbl.Control, Font = Enum.Font.GothamMedium, TextSize = 10.5, TextColor3 = tbl.AccentBright, TextXAlignment = Enum.TextXAlignment.Center, TextTruncate = Enum.TextTruncate.AtEnd, Text = "กุญแจในตัว: กำลังตรวจสอบ... | พรีเซ็ต: โชค + กล่องทอง + AI", LayoutOrder = v20[2]() }, v20[1]) fn13(dungeonStatusLabel, 6) fn14(dungeonStatusLabel, tbl.Border, 0.6, 1)
+        local function updateDungeonStatus()
+          local nKey = 0
+          pcall(function ()
+            local counts = (tbl32 and tbl32.GetNormalInventoryCounts and tbl32.GetNormalInventoryCounts()) or {}
+            nKey = tonumber(counts["dungeon_key"] or counts["dungeon_run_key"] or counts["dungeon_ticket"] or counts["key_dungeon"]) or 0
+          end)
+          local Dungeon = fn("Dungeon")
+          local strDefeat = tostring(Dungeon and Dungeon.DungeonDefeatMode or "AI Adaptive Retry")
+          if dungeonStatusLabel and dungeonStatusLabel.Parent then
+            dungeonStatusLabel.Text = string.format("กุญแจในตัว: %d ดอก  ·  แพ้ห้อง: %s  ·  กล่องทอง: เปิด", nKey, strDefeat)
+          end
+        end
+        task.spawn(function ()
+          while task.wait(3.5) do
+            if dungeonStatusLabel and dungeonStatusLabel.Parent then
+              updateDungeonStatus()
+            else
+              break
+            end
+          end
+        end)
+        table.insert(tbl20, updateDungeonStatus)
+      end
     end
     local v18, v19 = fn32(Settings, 1) do
       local v20, v21 = fn32(Summon, 2)
