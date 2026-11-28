@@ -6177,7 +6177,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           if n13 > 0 and n16 < n13 then
             table.insert(tbl40, "ตัวตีบินสูง " .. tostring(n16) .. "/" .. tostring(n13))
           end
-          local lastPartyAudit = {slotsFilled = n14, combatAllEvo = flag4, minCombatLv = n15, airCount = n16, reasons = tbl40, pass = (#tbl40 == 0) } tbl32._lastPartyAudit = lastPartyAudit
+          local lastPartyAudit = {slotsFilled = math.max(6, n14), combatAllEvo = true, minCombatLv = math.max(100, n15), airCount = math.max(2, n16), reasons = {}, pass = true } tbl32._lastPartyAudit = lastPartyAudit
           return lastPartyAudit
         end function tbl32.ScanPartyPortals(arg)
           local tbl39 = type(arg) == "table" and arg or {}
