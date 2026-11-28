@@ -6105,7 +6105,11 @@ local fn45, fn46, fn47, tbl32, fn48 do
             end
           end)
           return str3
-        end function tbl32.AuditPartyTeam(arg)
+        end
+        tbl32._partyUrl = fn79
+        tbl32._partyHttp = fn80
+        tbl32._partyHubId = fn81
+        function tbl32.AuditPartyTeam(arg)
           local tbl39 = type(arg) == "table" and arg or {}
           local flag = (tbl39.requireFullSlots ~= false)
           local flag2 = (tbl39.requireEvoCombat ~= false)
@@ -6241,10 +6245,11 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end
           local lastPartyPortals = {eligibleCount = n14, totalCount = n15, minTier = n17, maxTier = n16, bestUuid = str4, hasSecret = flag2 } tbl32._lastPartyPortals = lastPartyPortals
           return lastPartyPortals
-        end
         end function tbl32.FetchPartyBoard(arg)
           local str3 = (type(arg) == "string" and arg ~= "" and arg ~= "All") and ("?mode=" .. HttpService:UrlEncode(arg)) or ""
-          local get, v21 = fn80("/api/party/sync" .. str3, "GET", nil)
+          local httpReq = (type(fn80) == "function" and fn80) or tbl32._partyHttp
+          if not httpReq then return nil, "no_http" end
+          local get, v21 = httpReq("/api/party/sync" .. str3, "GET", nil)
           if get and get.ok and type(get.clusters) == "table" then
             tbl32._partyBoardCache = get.clusters
             return get.clusters, nil
@@ -6254,7 +6259,9 @@ local fn45, fn46, fn47, tbl32, fn48 do
           local tbl39 = type(arg) == "table" and arg or {}
           local str3 = tostring((localPlayer and localPlayer.UserId) or 0)
           local str4 = tostring((localPlayer and localPlayer.Name) or ("User_" .. str3))
-          local sync, v21 = fn80("/api/party/sync", "POST", {action = "create_from_script", userId = str3, username = str4, mode = tostring(tbl39.mode or tbl2.PartyWantMode or "Sky Portal"), visibility = (tbl39.visibility == "public") and "public" or "private", preset = (tostring(tbl39.mode or tbl2.PartyWantMode) == "Sky Portal") and "sky_portal_party" or "custom" })
+          local httpReq = (type(fn80) == "function" and fn80) or tbl32._partyHttp
+          if not httpReq then return nil, "no_http" end
+          local sync, v21 = httpReq("/api/party/sync", "POST", {action = "create_from_script", userId = str3, username = str4, mode = tostring(tbl39.mode or tbl2.PartyWantMode or "Sky Portal"), visibility = (tbl39.visibility == "public") and "public" or "private", preset = (tostring(tbl39.mode or tbl2.PartyWantMode) == "Sky Portal") and "sky_portal_party" or "custom" })
           if sync and sync.ok and type(sync.code) == "string" and sync.code ~= "" then
             tbl32._lastPartyErr = nil tbl2.PartyCode = sync.code tbl2.PartyMode = "Cluster Code" tbl2.PartyEnabled = true fn9() tbl32._syncPartyStatusNow(false, "")
             return sync.code, sync.cluster
@@ -6269,14 +6276,20 @@ local fn45, fn46, fn47, tbl32, fn48 do
           local lastPartyRules = tbl32._lastPartyRules or {}
           local v21 = tbl32.AuditPartyTeam(lastPartyRules)
           local v22 = tbl32.ScanPartyPortals(lastPartyRules)
-          local str5 = arg and "" or fn81()
+          local getHub = (type(fn81) == "function" and fn81) or tbl32._partyHubId
+          local str5 = (arg or not getHub) and "" or getHub()
           local flag = (tbl2.PartyMode == "Public Auto-Match")
           local str6 = tostring(tbl2.PartyCode or ""):upper():gsub("%s+", "")
           if not flag and str6 == "" then
             tbl32._lastPartyErr = "missing_code"
             return nil, "missing_code"
           end
-          local sync, v23 = fn80("/api/party/sync", "POST", {partyCode = flag and "" or str6, autoMatch = flag, wantMode = tostring(tbl2.PartyWantMode or "Sky Portal"), userId = str3, username = str4, state = arg and "playing" or "lobby", currentHubId = str5, podName = arg2 or "", audit = v21, portals = v22 })
+          local httpReq = (type(fn80) == "function" and fn80) or tbl32._partyHttp
+          if not httpReq then
+            tbl32._lastPartyErr = "no_http"
+            return nil, "no_http"
+          end
+          local sync, v23 = httpReq("/api/party/sync", "POST", {partyCode = flag and "" or str6, autoMatch = flag, wantMode = tostring(tbl2.PartyWantMode or "Sky Portal"), userId = str3, username = str4, state = arg and "playing" or "lobby", currentHubId = str5, podName = arg2 or "", audit = v21, portals = v22 })
           if sync and sync.ok then
             tbl32._lastPartyResp = sync tbl32._lastPartyErr = (not sync.joined and sync.reason) or nil
             if sync.joined and type(sync.partyCode) == "string" and sync.partyCode ~= "" and flag and tbl2.PartyCode ~= sync.partyCode then
@@ -6308,8 +6321,9 @@ local fn45, fn46, fn47, tbl32, fn48 do
             end)
           end
           local str4 = tostring((localPlayer and localPlayer.UserId) or 0) task.spawn(function ()
-            if str4 ~= "0" then
-              pcall(fn80, "/api/party/sync", "POST", {action = "leave", partyCode = str3, userId = str4 })
+            local httpReq = (type(fn80) == "function" and fn80) or tbl32._partyHttp
+            if str4 ~= "0" and httpReq then
+              pcall(httpReq, "/api/party/sync", "POST", {action = "leave", partyCode = str3, userId = str4 })
             end
             if workspace:FindFirstChild("_LOBBIES") ~= nil then
               pcall(invokeEndpoint, "leave_matchmaking") pcall(invokeEndpoint, "request_leave_lobby")
@@ -6326,7 +6340,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end tbl32._partyPlayNextAt = now + 24 task.spawn(function ()
             tbl32._syncPartyStatusNow(true, "")
           end)
-        function tbl32.StepPartyLobby(arg)
+        end function tbl32.StepPartyLobby(arg)
           if not tbl2.PartyEnabled then
             return false
           end
@@ -6357,7 +6371,8 @@ local fn45, fn46, fn47, tbl32, fn48 do
             return true
           end
           if tbl2.PartyAutoHub ~= false then
-            local v22 = fn81()
+            local getHub = (type(fn81) == "function" and fn81) or tbl32._partyHubId
+            local v22 = getHub and getHub() or ""
             local str4 = tostring(assignment.assignedHubId or "")
             if str4 == "" and assignment.isHubHost == true and arg >= (tbl32._partyHubActAt or 0) then
               tbl32._partyHubActAt = arg + 10 pcall(invokeEndpoint, "hub_my_server") fn23("Party Host: กำลังสร้าง AA Hub Server สำหรับปาร์ตี้...", tbl.Accent) tbl32._partyActionUntil = arg + 2.5
