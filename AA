@@ -6179,11 +6179,11 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end
           local lastPartyAudit = {slotsFilled = math.max(6, n14), combatAllEvo = true, minCombatLv = math.max(100, n15), airCount = math.max(2, n16), reasons = {}, pass = true } tbl32._lastPartyAudit = lastPartyAudit
           return lastPartyAudit
-        end function tbl32.ScanPartyPortals(arg)
+        function tbl32.ScanPartyPortals(arg)
           local tbl39 = type(arg) == "table" and arg or {}
-          local str3 = tostring(tbl39.mode or tbl2.PartyWantMode or "Sky Portal")
-          local n12 = tonumber(tbl39.minTier) or 3
-          local n13 = tonumber(tbl39.maxTier) or 9
+          local str3 = tostring(tbl2.PartyWantMode or tbl39.mode or "Sky Portal")
+          local n12 = tonumber(tbl39.minTier) or 1
+          local n13 = tonumber(tbl39.maxTier) or 15
           local flag = (tbl39.allowSecretPortal == true)
           local n14, n15, n16, n17, str4, flag2 = 0, 0, 0, 99, "", false pcall(function ()
             local v21 = tbl32.GetLoader()
@@ -6192,6 +6192,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
             if type(uniqueItems) ~= "table" then
               return
             end
+            local portalNameFilter = tostring(tbl2.PortalName or "Any"):lower()
             for k, uniqueItem in pairs(uniqueItems) do
               if type(uniqueItem) == "table" and tostring(uniqueItem.item_id or ""):lower():find("portal", 1, true) then
                 local str5 = tostring(uniqueItem.item_id)
@@ -6206,7 +6207,20 @@ local fn45, fn46, fn47, tbl32, fn48 do
                   if n19 < n20 then
                     n15 = n15 + 1
                     local flag3 = (str5 == "portal_item__skypiea") or (flag and str5 == "portal_item__enel")
-                    local flag4 = (str3 ~= "Sky Portal" and (str5 ~= "portal_item__enel" or flag)) or flag3
+                    local flag4 = false
+                    if str3 == "Sky Portal" then
+                      flag4 = flag3
+                    elseif str3 == "Portal" then
+                      if portalNameFilter == "any" or portalNameFilter == "" or portalNameFilter == "none" then
+                        flag4 = true
+                      else
+                        local pName = tostring(uniquePortalData.name or str5):lower()
+                        local cleanFilter = portalNameFilter:gsub("%s+portal", ""):gsub("%s+", "_")
+                        flag4 = pName:find(cleanFilter, 1, true) ~= nil or str5:find(cleanFilter, 1, true) ~= nil
+                      end
+                    else
+                      flag4 = false
+                    end
                     local flag5 = (str5 == "portal_item__enel" and flag) or (n18 >= n12 and n18 <= n13)
                     if flag4 and flag5 then
                       n14 = n14 + 1
@@ -6227,6 +6241,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end
           local lastPartyPortals = {eligibleCount = n14, totalCount = n15, minTier = n17, maxTier = n16, bestUuid = str4, hasSecret = flag2 } tbl32._lastPartyPortals = lastPartyPortals
           return lastPartyPortals
+        end
         end function tbl32.FetchPartyBoard(arg)
           local str3 = (type(arg) == "string" and arg ~= "" and arg ~= "All") and ("?mode=" .. HttpService:UrlEncode(arg)) or ""
           local get, v21 = fn80("/api/party/sync" .. str3, "GET", nil)
@@ -6311,7 +6326,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end tbl32._partyPlayNextAt = now + 24 task.spawn(function ()
             tbl32._syncPartyStatusNow(true, "")
           end)
-        end function tbl32.StepPartyLobby(arg)
+        function tbl32.StepPartyLobby(arg)
           if not tbl2.PartyEnabled then
             return false
           end
@@ -6352,66 +6367,143 @@ local fn45, fn46, fn47, tbl32, fn48 do
               return true
             end
           end
-          local portals = workspace:FindFirstChild("_PORTALS")
-          local lobbies = (portals and portals:FindFirstChild("Lobbies")) or portals
+          local targetMode = tostring(tbl2.PartyWantMode or rules.mode or "Sky Portal")
+          local isPortalMode = (targetMode == "Sky Portal" or targetMode == "Portal")
+          local lobbies = nil
+          if isPortalMode then
+            local portals = workspace:FindFirstChild("_PORTALS")
+            lobbies = (portals and portals:FindFirstChild("Lobbies")) or portals
+          elseif targetMode == "Dungeon" then
+            local dungeons = workspace:FindFirstChild("_DUNGEONS") or workspace:FindFirstChild("_LOBBIES")
+            lobbies = dungeons and (dungeons:FindFirstChild("Lobbies") or dungeons:FindFirstChild("Dungeon") or dungeons:FindFirstChild("Dungeons") or dungeons)
+          elseif targetMode == "Raid" then
+            local raid = workspace:FindFirstChild("_RAID") or workspace:FindFirstChild("_LOBBIES")
+            lobbies = raid and (raid:FindFirstChild("Raid") or raid:FindFirstChild("Lobbies") or raid)
+          elseif targetMode == "Summer Event" then
+            local ec = workspace:FindFirstChild("_EVENT_CHALLENGES")
+            lobbies = ec and (ec:FindFirstChild("Lobbies") or ec)
+          else
+            local l = workspace:FindFirstChild("_LOBBIES")
+            lobbies = l and (l:FindFirstChild("Story") or l)
+          end
           local name = localPlayer and localPlayer.Name or ""
-          if assignment.isOpener == true and tostring(assignment.portalUuid or "") ~= "" then
-            local v22 = nil
-            if lobbies then
-              for i, child in ipairs(lobbies:GetChildren()) do
-                local owner = child:FindFirstChild("Owner")
-                if owner and (owner.Value == localPlayer or tostring(owner.Value) == name) then
-                  v22 = child
-                  break
+          if assignment.isOpener == true then
+            if isPortalMode and tostring(assignment.portalUuid or "") ~= "" then
+              local v22 = nil
+              if lobbies then
+                for i, child in ipairs(lobbies:GetChildren()) do
+                  local owner = child:FindFirstChild("Owner")
+                  if owner and (owner.Value == localPlayer or tostring(owner.Value) == name) then
+                    v22 = child
+                    break
+                  end
                 end
               end
-            end
-            if not v22 and arg >= (tbl32._partyOpenCooldown or 0) then
-              tbl32._partyOpenCooldown = arg + 6 fn23("Party Opener: เปิดประตู " .. tostring(assignment.portalUuid):sub(1, 8) .. "...", tbl.Emerald) invokeEndpoint("use_portal", assignment.portalUuid)
-              for i = 1, 14 do
-                task.wait(0.25)
-                if lobbies then
-                  for i2, child in ipairs(lobbies:GetChildren()) do
-                    local owner = child:FindFirstChild("Owner")
-                    if owner and (owner.Value == localPlayer or tostring(owner.Value) == name) then
-                      v22 = child
-                      break
+              if not v22 and arg >= (tbl32._partyOpenCooldown or 0) then
+                tbl32._partyOpenCooldown = arg + 6 fn23("Party Opener: เปิดประตู " .. tostring(assignment.portalUuid):sub(1, 8) .. "...", tbl.Emerald) invokeEndpoint("use_portal", assignment.portalUuid)
+                for i = 1, 14 do
+                  task.wait(0.25)
+                  if lobbies then
+                    for i2, child in ipairs(lobbies:GetChildren()) do
+                      local owner = child:FindFirstChild("Owner")
+                      if owner and (owner.Value == localPlayer or tostring(owner.Value) == name) then
+                        v22 = child
+                        break
+                      end
                     end
+                  end
+                  if v22 then
+                    break
                   end
                 end
                 if v22 then
-                  break
+                  tbl32._partyPodOpenedAt = os.clock() tbl32._syncPartyStatusNow(false, v22.Name) fn23("Party Opener: รอลูกตี้เข้าห้อง (" .. v22.Name .. ")...", tbl.AccentBright)
+                end tbl32._partyActionUntil = os.clock() + 1.2
+                return true
+              elseif v22 then
+                tbl32._syncPartyStatusNow(false, v22.Name)
+                local players = v22:FindFirstChild("Players")
+                local n13 = players and #players:GetChildren() or 1
+                local n14 = math.max(1, math.min(tonumber(rules.maxPerPod) or 6, tonumber(assignment.squadMemberCount) or 1))
+                local n15 = os.clock() - (tbl32._partyPodOpenedAt or os.clock())
+                local n16 = tonumber(rules.waitTimeoutSec) or 12
+                if n13 >= n14 or n15 >= n16 then
+                  fn23("Party Opener: สมาชิกครบพร้อมแล้ว (" .. tostring(n13) .. "/" .. tostring(n14) .. ") -> เริ่มด่าน!", tbl.Emerald) invokeEndpoint("request_start_game", v22.Name) tbl32._partyActionUntil = os.clock() + 6.0
+                  return true
                 end
               end
-              if v22 then
-                tbl32._partyPodOpenedAt = os.clock() tbl32._syncPartyStatusNow(false, v22.Name) fn23("Party Opener: รอลูกตี้เข้าห้อง (" .. v22.Name .. "...", tbl.AccentBright)
-              end tbl32._partyActionUntil = os.clock() + 1.2
-              return true
-            elseif v22 then
-              tbl32._syncPartyStatusNow(false, v22.Name)
-              local players = v22:FindFirstChild("Players")
-              local n13 = players and #players:GetChildren() or 1
-              local n14 = math.max(1, math.min(tonumber(rules.maxPerPod) or 6, tonumber(assignment.squadMemberCount) or 1))
-              local n15 = os.clock() - (tbl32._partyPodOpenedAt or os.clock())
-              local n16 = tonumber(rules.waitTimeoutSec) or 12
-              if n13 >= n14 or n15 >= n16 then
-                fn23("Party Opener: สมาชิกครบพร้อมแล้ว (" .. tostring(n13) .. "/" .. tostring(n14) .. ") -> เริ่มด่าน!", tbl.Emerald) invokeEndpoint("request_start_game", v22.Name) tbl32._partyActionUntil = os.clock() + 6.0
-                return true
+            elseif not isPortalMode then
+              local v22 = nil
+              if lobbies then
+                for i, child in ipairs(lobbies:GetChildren()) do
+                  local owner = child:FindFirstChild("Owner")
+                  if owner and (owner.Value == localPlayer or tostring(owner.Value) == name) then
+                    v22 = child
+                    break
+                  end
+                end
+              end
+              if not v22 and arg >= (tbl32._partyOpenCooldown or 0) then
+                local pod = nil
+                if tbl32._findPodForMode then
+                  pod = tbl32._findPodForMode(targetMode == "Story / Infinite" and "Story" or targetMode)
+                end
+                if not pod and lobbies then
+                  local c = lobbies:GetChildren()
+                  pod = c and c[1]
+                end
+                if pod and arg >= (tbl32._partyOpenCooldown or 0) then
+                  tbl32._partyOpenCooldown = arg + 5
+                  fn23("Party Host: เข้าห้อง " .. pod.Name .. " (" .. targetMode .. ")...", tbl.Emerald)
+                  invokeEndpoint("request_join_lobby", pod.Name)
+                  task.wait(0.4)
+                  tbl32._partyPodOpenedAt = os.clock()
+                  tbl32._syncPartyStatusNow(false, pod.Name)
+                  return true
+                end
+              elseif v22 then
+                tbl32._syncPartyStatusNow(false, v22.Name)
+                local players = v22:FindFirstChild("Players")
+                local n13 = players and #players:GetChildren() or 1
+                local n14 = math.max(1, math.min(tonumber(rules.maxPerPod) or 6, tonumber(assignment.squadMemberCount) or 1))
+                local n15 = os.clock() - (tbl32._partyPodOpenedAt or os.clock())
+                local n16 = tonumber(rules.waitTimeoutSec) or 12
+                if n13 >= n14 or n15 >= n16 then
+                  fn23("Party Host: สมาชิกพร้อมแล้ว (" .. tostring(n13) .. "/" .. tostring(n14) .. ") -> เริ่มด่าน (" .. targetMode .. ")!", tbl.Emerald)
+                  if targetMode == "Raid" and tbl2.RaidLevel and tbl2.RaidLevel ~= "None" then
+                    pcall(invokeEndpoint, "request_lock_level", v22.Name, tbl2.RaidLevel, true, "Hard")
+                    task.wait(0.3)
+                  end
+                  invokeEndpoint("request_start_game", v22.Name)
+                  tbl32._partyActionUntil = os.clock() + 6.0
+                  return true
+                end
               end
             end
           elseif tostring(assignment.targetPodName or "") ~= "" then
             local v22 = lobbies and lobbies:FindFirstChild(tostring(assignment.targetPodName))
+            if not v22 and workspace:FindFirstChild("_LOBBIES") then
+              v22 = workspace._LOBBIES:FindFirstChild(tostring(assignment.targetPodName), true)
+            end
+            if not v22 and workspace:FindFirstChild("_PORTALS") then
+              v22 = workspace._PORTALS:FindFirstChild(tostring(assignment.targetPodName), true)
+            end
+            if not v22 and workspace:FindFirstChild("_DUNGEONS") then
+              v22 = workspace._DUNGEONS:FindFirstChild(tostring(assignment.targetPodName), true)
+            end
+            if not v22 and workspace:FindFirstChild("_RAID") then
+              v22 = workspace._RAID:FindFirstChild(tostring(assignment.targetPodName), true)
+            end
             if v22 then
               local players = v22:FindFirstChild("Players")
               local flag = players and players:FindFirstChild(name) ~= nil
               if not flag and arg >= (tbl32._partyJoinCooldown or 0) then
-                tbl32._partyJoinCooldown = arg + 2.5 fn23("Party: กำลังเข้า Pod ของ " .. tostring(assignment.openerUsername or "Opener") .. "...", tbl.Accent) invokeEndpoint("request_join_lobby", v22.Name)
+                tbl32._partyJoinCooldown = arg + 2.5 fn23("Party: กำลังเข้าห้อง " .. tostring(v22.Name) .. " (" .. targetMode .. ")...", tbl.Accent) invokeEndpoint("request_join_lobby", v22.Name)
               end
             end
           end tbl32._partyActionUntil = arg + 1.0
           return true
         end
-      end
       local n12 = 0
       local n13 = 0
       local tbl39 = {}
@@ -15677,7 +15769,7 @@ end do
             end
           end)
         end
-      end }, {"dropdown", "Target Party Mode", "PartyWantMode", {"Sky Portal", "Portal", "Dungeon", "Raid", "Summer Event", "Story / Infinite" }, default = "Sky Portal" }, {"toggle", "Auto Hub Server (Keep Party)", "PartyAutoHub", default = true } }, refreshAllControls) fn43(v23, "Connect / Sync Party Now", true, function ()
+      end }, {"dropdown", "Target Party Mode", "PartyWantMode", {"Sky Portal", "Portal", "Dungeon", "Raid", "Summer Event", "Story / Infinite" }, default = "Sky Portal", after = function(m) tbl2.PartyWantMode = m fn9() if tbl32 and tbl32.ConnectPartyNow and tbl2.PartyEnabled then task.spawn(function() tbl32.ConnectPartyNow(true) end) end end }, {"toggle", "Auto Hub Server (Keep Party)", "PartyAutoHub", default = true } }, refreshAllControls) fn43(v23, "Connect / Sync Party Now", true, function ()
         task.spawn(function ()
           if not (tbl32 and tbl32.ConnectPartyNow) then
             return
