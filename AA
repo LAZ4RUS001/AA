@@ -6179,7 +6179,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end
           local lastPartyAudit = {slotsFilled = math.max(6, n14), combatAllEvo = true, minCombatLv = math.max(100, n15), airCount = math.max(2, n16), reasons = {}, pass = true } tbl32._lastPartyAudit = lastPartyAudit
           return lastPartyAudit
-        function tbl32.ScanPartyPortals(arg)
+        end function tbl32.ScanPartyPortals(arg)
           local tbl39 = type(arg) == "table" and arg or {}
           local str3 = tostring(tbl2.PartyWantMode or tbl39.mode or "Sky Portal")
           local n12 = tonumber(tbl39.minTier) or 1
@@ -6504,6 +6504,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end tbl32._partyActionUntil = arg + 1.0
           return true
         end
+      end
       local n12 = 0
       local n13 = 0
       local tbl39 = {}
