@@ -47,7 +47,7 @@ local tbl5 = {}
 local tbl6 = {}
 local tbl7 = {}
 for i = 1, 6 do
-  tbl7[i] = {Slot = i, Enabled = true, Priority = i, MaxCount = 6, MaxUpgrade = 15, StartWave = 1, UpgradeWave = 1, SellWave = 0, AutoSkill = true, SkillWave = 1, SkillMinStack = 0, SkillPosMode = "มอนเยอะสุด (คุ้มสุด)", BossOnly = false, BuffLoop = false, UnitName = "Slot " .. tostring(i) }
+  tbl7[i] = {Slot = i, Enabled = true, Priority = i, MaxCount = 10, MaxUpgrade = 15, StartWave = 1, UpgradeWave = 1, SellWave = 0, AutoSkill = true, SkillWave = 1, SkillMinStack = 0, SkillPosMode = "มอนเยอะสุด (คุ้มสุด)", BossOnly = false, BuffLoop = false, UnitName = "Slot " .. tostring(i) }
 end
 local tbl8 = {}
 local tbl9 = {}
@@ -216,7 +216,7 @@ local function fn8(arg, arg2)
           tbl7[i].Priority = math.clamp(math.floor(v.Priority), 1, 6)
         end
         if tonumber(v.MaxCount) then
-          tbl7[i].MaxCount = math.clamp(math.floor(v.MaxCount), 0, 6)
+          tbl7[i].MaxCount = math.clamp(math.floor(v.MaxCount), 0, 15)
         end
         if tonumber(v.MaxUpgrade) then
           tbl7[i].MaxUpgrade = math.clamp(math.floor(v.MaxUpgrade), 0, 15)
@@ -7014,7 +7014,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
         end
         return v23
       end tbl32._getUnitPlaceCap = function (arg, arg2, arg3)
-        local n16 = (type(arg2) == "table" and (tonumber(arg2.spawn_cap) or tonumber(arg2.max_spawn_units))) or 5
+        local n16 = (type(arg2) == "table" and (tonumber(arg2.spawn_cap) or tonumber(arg2.max_spawn_units))) or 10
         if (type(arg2) == "table" and arg2.unique == true) or (type(arg) == "table" and arg.IsUnique == true) then
           n16 = 1
         end
@@ -7047,7 +7047,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           local v25 = loadData and loadData[v24.UnitId]
           local v26 = string.lower(tostring((type(v25) == "table" and v25.name) or v24.UnitId or ""))
           local n16 = (type(v25) == "table" and tonumber(v25.cost)) or 1500
-          local n17 = (type(v25) == "table" and (tonumber(v25.spawn_cap) or tonumber(v25.max_spawn_units))) or 3
+          local n17 = (type(v25) == "table" and (tonumber(v25.spawn_cap) or tonumber(v25.max_spawn_units))) or 10
           if v24.IsUnique == true or (type(v25) == "table" and v25.unique == true) then
             n17 = 1
           end
@@ -7081,7 +7081,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           local n26 = (v27 == "secret" and 1.18) or (v27 == "mythic" and 1.08) or 1.0
           local n27 = (n23 * 0.65 + n22 * 0.35) * n26 + (n25 * 500)
           local flag4 = v26:find("elyssia", 1, true) ~= nil or tostring(v24.UnitId or ""):lower():find("elyssia", 1, true) ~= nil
-          local tbl44 = {Slot = v24.Slot, UnitId = v24.UnitId, Def = v25, Cost = n16, Cap = math.clamp(n17, 1, 6), MaxUpg = n20, CarryScore = n27, BaseDps = n24, EarlyDps = n25, HasSkill = flag3 == true or isSlowLoopUnit(v24.UnitId, v25), IsSlowLoop = isSlowLoopUnit(v24.UnitId, v25), IsElyssia = flag4, NameLow = v26 }
+          local tbl44 = {Slot = v24.Slot, UnitId = v24.UnitId, Def = v25, Cost = n16, Cap = math.clamp(n17, 1, 15), MaxUpg = n20, CarryScore = n27, BaseDps = n24, EarlyDps = n25, HasSkill = flag3 == true or isSlowLoopUnit(v24.UnitId, v25), IsSlowLoop = isSlowLoopUnit(v24.UnitId, v25), IsElyssia = flag4, NameLow = v26 }
           if isFarmUnit(v24.UnitId) then
             table.insert(tbl41, tbl44)
           elseif isBuffUnit(v24.UnitId, v25) then
@@ -7208,7 +7208,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
                   end
                 end
               else
-                v25.Enabled = true v25.Priority = v24.Slot v25.MaxCount = 6 v25.MaxUpgrade = 15 v25.StartWave = 1 v25.UpgradeWave = 1 v25.SellWave = 0 v25.AutoSkill = true v25.SkillWave = 1 v25.BossOnly = false v25.BuffLoop = isBuffUnit(v24.UnitId, v26) or isSlowLoopUnit(v24.UnitId, v26) v25.BuffLoopSet = false
+                v25.Enabled = true v25.Priority = v24.Slot v25.MaxCount = 10 v25.MaxUpgrade = 15 v25.StartWave = 1 v25.UpgradeWave = 1 v25.SellWave = 0 v25.AutoSkill = true v25.SkillWave = 1 v25.BossOnly = false v25.BuffLoop = isBuffUnit(v24.UnitId, v26) or isSlowLoopUnit(v24.UnitId, v26) v25.BuffLoopSet = false
               end v25.UnitId = v24.UnitId
               if fn46 then
                 pcall(fn46, v24.Slot)
@@ -8612,7 +8612,12 @@ local fn45, fn46, fn47, tbl32, fn48 do
             end
           elseif v24 > n14 then
             tbl36.streak = {}
-          end tbl36.attempts = 0 n14 = v24
+          end
+          if now >= (tbl36._lastStreakReset or 0) then
+            tbl36._lastStreakReset = now + 4.0
+            tbl36.streak = {}
+          end
+          tbl36.attempts = 0 n14 = v24
           if v10 and now >= n15 then
             local n20 = 0
             for i, v28 in ipairs(v10.ground) do
@@ -8893,11 +8898,9 @@ local fn45, fn46, fn47, tbl32, fn48 do
               end
             end
           end
-          if tbl2.FocusFarm then
-            local n25 = (n24 >= 1600) and ((v24 <= 2 and 1) or (v24 <= 5 and 2) or math.min(5, v24 - 3)) or ((v24 <= 1 and 1) or (v24 <= 2 and 2) or (v24 <= 5 and 3) or math.min(5, v24 - 2)) n18 = math.min(math.max(1, n22), n25)
-          else
-            n18 = (v24 <= 1) and 1 or math.min(math.max(1, n22), math.min(5, v24))
-          end
+          -- Ensure full team placement up to all 5-6 units without wave throttling
+          local targetUnitCount = math.max(99, n22)
+          n18 = targetUnitCount
           local anchor = v10.anchor
           if #tbl44 > 0 then
             local vector = Vector3.zero
@@ -8926,7 +8929,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
                 local n25 = math.min(v32, (v30 and v30.MaxCount) or v32)
                 local n26 = tbl50[v29.Uuid] or tbl51[v29.UnitId] or 0
                 local startWave = (v30 and v30.StartWave) or 1
-                if ((not v30) or v30.Enabled ~= false) and type(v31) == "table" and v31.cost and v24 >= startWave and n26 < n25 and (tbl36.streak[v29.Uuid] or 0) < 2 then
+                if ((not v30) or v30.Enabled ~= false) and type(v31) == "table" and v31.cost and v24 >= startWave and n26 < n25 and (tbl36.streak[v29.Uuid] or 0) < 5 then
                   flag11 = true
                   break
                 end
@@ -8941,7 +8944,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
                 local v30 = fn3(v29.Slot)
                 local startWave = (v30 and v30.StartWave) or 1
                 local n26 = tbl50[v29.Uuid] or tbl51[v29.UnitId] or 0
-                if ((not v30) or v30.Enabled ~= false) and v24 >= startWave and n26 == 0 and (tbl36.streak[v29.Uuid] or 0) < 2 then
+                if ((not v30) or v30.Enabled ~= false) and v24 >= startWave and n26 == 0 and (tbl36.streak[v29.Uuid] or 0) < 5 then
                   flag14 = true n25 = (v30 and v30.Priority) or v29.Slot or 99
                   break
                 end
@@ -8953,7 +8956,8 @@ local fn45, fn46, fn47, tbl32, fn48 do
             local v31 = fn3(v30.Slot)
             local flag15 = (not v31) or (v31.Enabled ~= false)
             local v32 = isFarmUnit(v30.UnitId)
-            local startWave = (tbl32._dungeonAdaptFastPlace and not v32 and 1) or ((v31 and v31.StartWave) or 1)
+            local n27 = tbl50[v30.Uuid] or tbl51[v30.UnitId] or 0
+            local startWave = (tbl32._dungeonAdaptFastPlace and not v32 and 1) or (n27 == 0 and 1) or ((v31 and v31.StartWave) or 1)
             local v33 = loadData[v30.UnitId]
             local v34 = tbl32._getUnitPlaceCap(v30, v33, tbl36.uniqueLock)
             local n26 = math.min(v34, (v31 and v31.MaxCount) or v34)
@@ -8968,7 +8972,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
             local priority = (v31 and v31.Priority) or v30.Slot or 99
             local flag18 = flag16 and flag15 and v35 ~= nil and v24 >= startWave and n28 > 0 and not (v32 and flag8)
             local n29 = (flag17 and n28 > 1 and v35) and (v35 * n28) or v35
-            local flag19 = tbl2.FocusFarm and flag11 and not (#tbl44 == 0 and v24 >= 3)
+            local flag19 = tbl2.FocusFarm and flag11 and (#tbl44 == 0 and v24 < 3)
             local flag20 = tostring((v33 and v33.name) or v30.UnitId or ""):lower():find("elyssia", 1, true) ~= nil
             local flag21 = (flag19 and not v32) or (flag14 and not v32 and not flag20 and n25 <= priority) or false
             if v32 and #tbl44 == 0 and v24 >= 3 then
@@ -8978,34 +8982,17 @@ local fn45, fn46, fn47, tbl32, fn48 do
                   local v38 = loadData[v36.UnitId]
                   local startWave2 = (tbl32._dungeonAdaptFastPlace and 1) or ((v37 and v37.StartWave) or 1)
                   local flag22 = ((v37 and v37.BuffLoop) or isBuffUnit(v36.UnitId, v38)) and not isSlowLoopUnit(v36.UnitId, v38)
-                  if ((not v37) or v37.Enabled ~= false) and not flag22 and v24 >= startWave2 and (tbl36.streak[v36.Uuid] or 0) < 2 then
+                  if ((not v37) or v37.Enabled ~= false) and not flag22 and v24 >= startWave2 and (tbl36.streak[v36.Uuid] or 0) < 5 then
                     flag21 = true
                     break
                   end
                 end
               end
             end
-            local flag22 = (#tbl44 < n18)
-            if flag10 and #tbl44 >= 1 and not v32 and v35 ~= nil then
-              if tbl2.AutoUpgrade and not flag22 then
-                for i2, v36 in ipairs(v27) do
-                  local farm = (tbl2.FocusFarm and v36.Farm)
-                  local flag23 = (not v36.Farm and n27 >= 1 and v36.Prio < priority and v36.Cost <= v35 * 1.8)
-                  if (farm or flag23) and (v29 >= v36.Cost or not flag9 or v35 > fn83(v29, v36.Cost)) then
-                    flag21 = true
-                    break
-                  end
-                end
-              end
-              if not flag21 then
-                for i2, v36 in ipairs(tbl45) do
-                  local flag23 = (tbl2.FocusFarm and v36.Farm and not (#tbl44 == 0 and v24 >= 3)) or ((not v36.Farm or tbl2.FocusFarm) and v36.Prio < priority)
-                  if v36.Cost > v29 and flag23 and (v36.Buff or not flag9 or v35 > fn83(v29, v36.Cost)) then
-                    flag21 = true
-                    break
-                  end
-                end
-              end
+            local flag22 = true
+            -- Uncapped placement: whenever unit has capacity (n28 > 0) and we can afford it (v29 >= n29), place it immediately without any 5-unit limit
+            if n28 > 0 and v29 >= n29 and not flag12 then
+              flag21 = false
             end
             if flag18 and v29 < n29 then
               table.insert(tbl45, {Cost = n29, Prio = priority, Farm = v32 == true, Buff = flag17 == true, Elyssia = flag20 == true, FirstCopy = (n27 == 0) })
@@ -9326,7 +9313,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
               local n33 = 0
               local tbl53 = tbl36.nodes[v30.Uuid]
               for i2, v38 in ipairs(v37 or {}) do
-                if tbl36.attempts >= 6 then
+                if tbl36.attempts >= 15 then
                   break
                 end
                 if not tbl35[v38] and not (tbl53 and tbl53[v38]) then
@@ -9393,7 +9380,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
                       local n34 = n27 + n33
                       local str5 = tostring(v39 or ""):lower()
                       local flag27 = n34 >= 1 and (os.clock() - (tbl36._lastUniqueToastAt or 0)) < 1.5
-                      if str5:find("unique", 1, true) or flag27 or (tbl32._getUnitPlaceCap(v30, v33, tbl36.uniqueLock) <= n34) then
+                      if str5:find("unique", 1, true) or flag27 or (n34 >= 1 and tbl32._getUnitPlaceCap(v30, v33, tbl36.uniqueLock) <= n34) then
                         tbl36.uniqueLock = tbl36.uniqueLock or {} tbl36.uniqueLock[v30.Uuid] = math.max(1, n34)
                         break
                       end n31 = n31 + 1
@@ -9405,7 +9392,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
                 end
               end
               if not flag12 and not (tbl36.uniqueLock and tbl36.uniqueLock[v30.Uuid]) then
-                local n34 = (tbl36.streak[v30.Uuid] or 0) + 1 tbl36.streak[v30.Uuid] = n34 tbl39[v30.Uuid] = now + math.min(18, 3.0 * n34)
+                local n34 = (tbl36.streak[v30.Uuid] or 0) + 1 tbl36.streak[v30.Uuid] = n34 tbl39[v30.Uuid] = now + math.min(4.0, 1.0 * n34)
               end
             end
           end
@@ -13700,7 +13687,7 @@ end do
         return arg.Priority
       end, function (arg, priority)
         arg.Priority = priority
-      end) fn56("จำนวนวางสูงสุด", 0, 6, 1, function (arg)
+      end) fn56("จำนวนวางสูงสุด", 0, 15, 1, function (arg)
         return tostring(arg) .. " ตัว"
       end, function (arg)
         return arg.MaxCount
