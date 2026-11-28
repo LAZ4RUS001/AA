@@ -7074,7 +7074,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
             num = n16 * 18
           end
           local n22 = num / math.max(0.5, num2)
-          local n23 = n22 * math.clamp(n17, 1, 6)
+          local n23 = n22 * math.clamp(n17, 1, 10)
           local n24 = math.max(100, n18) / n19
           local n25 = n24 / math.max(300, n16)
           local v27 = string.lower(tostring(type(v25) == "table" and v25.rarity or ""))
@@ -7089,11 +7089,42 @@ local fn45, fn46, fn47, tbl32, fn48 do
           else
             table.insert(tbl43, tbl44)
           end
-        end table.sort(tbl41, function (arg, arg2)
+        end
+
+        -- Sort farms by cost
+        table.sort(tbl41, function (arg, arg2)
           return arg.Cost < arg2.Cost
-        end) table.sort(tbl42, function (arg, arg2)
+        end)
+        -- Sort buffers by cost
+        table.sort(tbl42, function (arg, arg2)
           return arg.Cost < arg2.Cost
-        end) table.sort(tbl43, function (arg, arg2)
+        end)
+
+        -- Smart human player role identification:
+        -- 1. Identify starter defender (cheap ground unit <= 1000¥ with best early DPS to protect wave 1)
+        local starterIdx = nil
+        local bestStarterScore = -999999
+        for i, u in ipairs(tbl43) do
+          local score = 0
+          if u.Cost <= 1000 then
+            score = (1200 - u.Cost) * 1.5 + (u.EarlyDps * 600)
+          else
+            score = -u.Cost
+          end
+          if score > bestStarterScore then
+            bestStarterScore = score
+            starterIdx = i
+          end
+        end
+
+        local starterUnit = nil
+        if starterIdx then
+          starterUnit = tbl43[starterIdx]
+          table.remove(tbl43, starterIdx)
+        end
+
+        -- 2. Sort remaining attackers by endgame carry potential
+        table.sort(tbl43, function (arg, arg2)
           if arg.IsElyssia ~= arg2.IsElyssia then
             return arg.IsElyssia
           end
@@ -7102,22 +7133,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end
           return arg.Cost < arg2.Cost
         end)
-        local flag3 = #tbl41 > 0
-        local isElyssia = (#tbl43 > 0 and tbl43[1].IsElyssia)
-        local v24 = nil
-        if not isElyssia and flag3 and #tbl43 >= 2 and tbl43[1].Cost >= 2200 then
-          local n16 = 0
-          local n17 = math.max(120, tbl43[1].BaseDps * 0.28)
-          for i = 2, #tbl43 do
-            local v25 = tbl43[i]
-            if v25.Cost <= 1650 and v25.BaseDps >= n17 then
-              local n18 = v25.BaseDps * 0.65 + v25.EarlyDps * 450
-              if n18 > n16 then
-                n16 = n18 v24 = i
-              end
-            end
-          end
-        end
+
         local activeSetMode = (tbl2.SeparateModeUnitSets and ((tbl2.ActiveSetMode ~= "" and tbl2.ActiveSetMode) or tbl2.TargetMode)) or nil
         local function fn82(arg, arg2, startWave, upgradeWave, maxCount, maxUpgrade, arg3, arg4)
           local tbl44 = {tbl7[arg.Slot] }
@@ -7129,7 +7145,18 @@ local fn45, fn46, fn47, tbl32, fn48 do
           end
           for i, v25 in ipairs(tbl44) do
             if v25 then
-              v25.UnitId = arg.UnitId v25.Enabled = true v25.Priority = math.clamp(arg2, 1, 6) v25.MaxCount = maxCount v25.StartWave = startWave v25.UpgradeWave = upgradeWave v25.MaxUpgrade = maxUpgrade v25.SellWave = 0 v25.BuffLoop = (arg3 == true) or (arg4 == true) v25.BuffLoopSet = v25.BuffLoop v25.AutoSkill = (v25.BuffLoop == true) or (arg.HasSkill == true) v25.SkillWave = v25.BuffLoop and startWave or 1
+              v25.UnitId = arg.UnitId
+              v25.Enabled = true
+              v25.Priority = math.clamp(arg2, 1, 6)
+              v25.MaxCount = maxCount
+              v25.StartWave = startWave
+              v25.UpgradeWave = upgradeWave
+              v25.MaxUpgrade = maxUpgrade
+              v25.SellWave = 0
+              v25.BuffLoop = (arg3 == true) or (arg4 == true)
+              v25.BuffLoopSet = v25.BuffLoop
+              v25.AutoSkill = (v25.BuffLoop == true) or (arg.HasSkill == true)
+              v25.SkillWave = v25.BuffLoop and startWave or 1
             end
           end
           local tbl45 = {}
@@ -7137,35 +7164,43 @@ local fn45, fn46, fn47, tbl32, fn48 do
             tbl45[v25] = tbl7[arg.Slot][v25]
           end tbl32._unitPresets[arg.UnitId] = tbl45
         end
-        local n16 = 1
-        for i, v25 in ipairs(tbl41) do
-          fn82(v25, n16, 1, 1, v25.Cap, v25.MaxUpg, false, false) n16 = n16 + 1
+
+        local prioIdx = 1
+
+        -- Priority 1: Farm units (Place farm first!)
+        for i, farm in ipairs(tbl41) do
+          fn82(farm, math.min(6, prioIdx), 1, 1, farm.Cap, farm.MaxUpg, false, false)
+          prioIdx = prioIdx + 1
         end
-        local n17 = math.min(#tbl43, (#tbl42 > 0) and 2 or #tbl43)
-        for i = 1, n17 do
-          local v25 = tbl43[i]
-          local n18, n19 = 1, 1
-          if flag3 then
-            if isElyssia then
-              n18 = v25.IsElyssia and 1 or 2 n19 = v25.IsElyssia and 1 or 2
-            elseif i == 1 then
-              n18 = v24 and 2 or 1 n19 = (v25.Cost >= 1800) and 2 or 1
-            elseif i == v24 then
-              n18 = 1 n19 = 2
-            else
-              n18 = 2 n19 = 2
-            end
-          end fn82(v25, n16, n18, n19, v25.Cap, v25.MaxUpg, false, v25.IsSlowLoop) n16 = n16 + 1
+
+        -- Priority 2: Starter DPS (Early wave defense)
+        if starterUnit then
+          fn82(starterUnit, math.min(6, prioIdx), 1, 1, starterUnit.Cap, starterUnit.MaxUpg, false, starterUnit.IsSlowLoop)
+          prioIdx = prioIdx + 1
         end
-        for i, v25 in ipairs(tbl42) do
-          local n18 = flag3 and 3 or 2
-          local n19 = math.min(v25.Cap, (v25.Cap >= 4) and 3 or v25.Cap) fn82(v25, n16, n18, n18 + 1, n19, 0, true, false) n16 = n16 + 1
+
+        -- Priority 3+: Core Attackers / Main Carries (High DPS & Map coverage)
+        for i, att in ipairs(tbl43) do
+          local startW = 1
+          if i == 1 then
+            startW = (att.Cost >= 1800 and #tbl41 > 0) and 2 or 1
+          else
+            startW = 2
+          end
+          local upgW = (i == 1) and 2 or 2
+          fn82(att, math.min(6, prioIdx), startW, upgW, att.Cap, att.MaxUpg, false, att.IsSlowLoop)
+          prioIdx = prioIdx + 1
         end
-        for i = n17 + 1, #tbl43 do
-          local v25 = tbl43[i]
-          local n18 = flag3 and ((i == v24 and 1) or 2) or 1
-          local n19 = 2 fn82(v25, n16, n18, n19, v25.Cap, v25.MaxUpg, false, v25.IsSlowLoop) n16 = n16 + 1
+
+        -- Priority Last: Buffers / Support (Wendy, Erwin, Windsong)
+        -- StartWave = 3 (Wait until actual DPS units exist on map)
+        for i, buf in ipairs(tbl42) do
+          local isErwin = buf.NameLow:find("erwin", 1, true) ~= nil
+          local maxUpg = isErwin and 0 or buf.MaxUpg
+          fn82(buf, math.min(6, prioIdx), 3, 4, buf.Cap, maxUpg, true, false)
+          prioIdx = prioIdx + 1
         end
+
         if activeSetMode and type(fn4) == "function" then
           pcall(fn4, activeSetMode)
         end fn9()
@@ -8907,14 +8942,95 @@ local fn45, fn46, fn47, tbl32, fn48 do
             for i, v29 in ipairs(tbl44) do
               vector = vector + v29
             end anchor = vector / #tbl44
-          end table.sort(v23, function (arg, arg2)
-            local v29, v30 = isFarmUnit(arg.UnitId), isFarmUnit(arg2.UnitId)
-            if v29 ~= v30 then
-              if tbl2.FocusFarm then
-                return v29
+          end local currentCash = fn58()
+          local attackersPlaced = 0
+          local farmsPlaced = 0
+          for _, u in ipairs(v23) do
+            local cnt = tbl50[u.Uuid] or tbl51[u.UnitId] or 0
+            if cnt > 0 then
+              if isFarmUnit(u.UnitId) then
+                farmsPlaced = farmsPlaced + cnt
               else
-                return not v29
+                local uDef = loadData and loadData[u.UnitId]
+                if not (isBuffUnit(u.UnitId, uDef) and not isSlowLoopUnit(u.UnitId, uDef)) then
+                  attackersPlaced = attackersPlaced + cnt
+                end
               end
+            end
+          end
+
+          local function getSmartUnitScore(u)
+            local uDef = loadData and loadData[u.UnitId]
+            local uCfg = fn3(u.Slot)
+            local isFarm = isFarmUnit(u.UnitId)
+            local isBuff = isBuffUnit(u.UnitId, uDef) and not isSlowLoopUnit(u.UnitId, uDef)
+            local placed = tbl50[u.Uuid] or tbl51[u.UnitId] or 0
+            local cap = tbl32._getUnitPlaceCap(u, uDef, tbl36.uniqueLock)
+            local maxCount = math.min(cap, (uCfg and uCfg.MaxCount) or cap)
+            local canPlace = placed < maxCount
+            local cost = (type(uDef) == "table" and tonumber(uDef.cost)) or 1000
+            local realCost = math.ceil(cost * n17)
+            local canAfford = currentCash >= realCost
+            local userPrio = (uCfg and uCfg.Priority) or u.Slot or 99
+            local startWave = (tbl32._dungeonAdaptFastPlace and not isFarm and 1) or (placed == 0 and 1) or ((uCfg and uCfg.StartWave) or 1)
+            local waveReady = v24 >= startWave
+
+            if not canPlace or (uCfg and uCfg.Enabled == false) then
+              return 9000 + userPrio
+            end
+
+            -- Tier 1: Farm 1st copy (Always place Farm first!)
+            if isFarm and placed == 0 then
+              local affordBonus = canAfford and 0 or 50
+              return 50 + affordBonus + userPrio
+            end
+
+            -- Tier 2: 1st copy of Combat Attackers / Starter / Main Carries (Placed right after Farm)
+            if not isFarm and not isBuff and placed == 0 then
+              local affordBonus = canAfford and 0 or 80
+              local wavePenalty = waveReady and 0 or 200
+              return 150 + wavePenalty + affordBonus + userPrio
+            end
+
+            -- Tier 3: Duplicate Farms (scale economy if FocusFarm and early waves)
+            if isFarm and placed > 0 and canPlace then
+              if tbl2.FocusFarm and v24 <= 10 then
+                local affordBonus = canAfford and 0 or 60
+                return 250 + (placed * 20) + affordBonus + userPrio
+              else
+                return 500 + (placed * 20) + userPrio
+              end
+            end
+
+            -- Tier 4: 1st copy of Buffers (Wendy, Erwin, Windsong - Mid game wave >= 3)
+            if isBuff and placed == 0 then
+              if v24 >= 3 and attackersPlaced >= 1 then
+                local affordBonus = canAfford and 0 or 80
+                return 350 + affordBonus + userPrio
+              else
+                return 750 + userPrio
+              end
+            end
+
+            -- Tier 5: Duplicate Attackers (scale DPS: 2nd, 3rd, 4th copies of carries)
+            if not isFarm and not isBuff and placed > 0 and canPlace then
+              local affordBonus = canAfford and 0 or 80
+              return 400 + (placed * 15) + affordBonus + userPrio
+            end
+
+            -- Tier 6: Duplicate Buffers / Other
+            if isBuff and placed > 0 and canPlace then
+              return 700 + (placed * 20) + userPrio
+            end
+
+            return 1000 + userPrio
+          end
+
+          table.sort(v23, function (arg, arg2)
+            local s1 = getSmartUnitScore(arg)
+            local s2 = getSmartUnitScore(arg2)
+            if s1 ~= s2 then
+              return s1 < s2
             end
             local priority = (tbl7[arg.Slot] and tbl7[arg.Slot].Priority) or arg.Slot
             local priority2 = (tbl7[arg2.Slot] and tbl7[arg2.Slot].Priority) or arg2.Slot
@@ -8972,7 +9088,7 @@ local fn45, fn46, fn47, tbl32, fn48 do
             local priority = (v31 and v31.Priority) or v30.Slot or 99
             local flag18 = flag16 and flag15 and v35 ~= nil and v24 >= startWave and n28 > 0 and not (v32 and flag8)
             local n29 = (flag17 and n28 > 1 and v35) and (v35 * n28) or v35
-            local flag19 = tbl2.FocusFarm and flag11 and (#tbl44 == 0 and v24 < 3)
+            local flag19 = tbl2.FocusFarm and flag11 and (attackersPlaced > 0 and v24 < 3)
             local flag20 = tostring((v33 and v33.name) or v30.UnitId or ""):lower():find("elyssia", 1, true) ~= nil
             local flag21 = (flag19 and not v32) or (flag14 and not v32 and not flag20 and n25 <= priority) or false
             if v32 and #tbl44 == 0 and v24 >= 3 then
@@ -13502,7 +13618,7 @@ end do
           end refreshAllControls()
           if _G.__SH_RT and type(_G.__SH_RT.openSlotModal) == "function" then
             _G.__SH_RT.openSlotModal(_G.__SH_RT.activeModalSlot or 1, false)
-          end fn21("Quick Priority (AI)", "จัดลำดับและเปิดใช้งานตัวละครอัตโนมัติ", tbl.Emerald)
+          end fn21("Quick Priority (AI)", "จัดลำดับทีมแบบฟาร์มนำ (ฟาร์มเงิน -> ตัวเปิดดาเมจ -> ตัวแบก DPS -> บัพเสริม)", tbl.Emerald)
         else
           fn21("Quick Priority", tostring(v18 or "ไม่สำเร็จ"), tbl.Amber)
         end
